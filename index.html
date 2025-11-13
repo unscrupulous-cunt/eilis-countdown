@@ -232,16 +232,6 @@
       margin-top: 0.2rem;
     }
 
-    .time-note {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      margin-bottom: 1rem;
-    }
-
-    .time-note strong {
-      font-weight: 600;
-    }
-
     .bottom-row {
       display: flex;
       justify-content: space-between;
@@ -297,6 +287,8 @@
       }
     }
   </style>
+  <!-- Confetti library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
   <main class="shell" role="main">
@@ -322,7 +314,7 @@
           <span>High priority</span>
         </div>
         <div class="chip">
-          ⏰ Today’s focus: stay excited
+          ⏰ Today’s focus: try not to message Jed
         </div>
       </div>
 
@@ -330,8 +322,9 @@
         <div class="summary-title">Event details</div>
         <p class="summary-text">
           This little page exists so Éilís can keep an eye on the seconds
-          ticking down to one very big moment. No stress, just a gentle
-          reminder that something special is on the way.
+          ticking down to the moment she and Jed finally get to spend the
+          night together. No stress, just a gentle reminder that something
+          very fun is on the way.
         </p>
         <div class="summary-time">
           <span>📅</span>
@@ -362,11 +355,6 @@
             <span>Seconds</span>
           </div>
         </div>
-        <p class="time-note">
-          Countdown is locked to <strong>UK time (Europe/London)</strong>, so
-          it will still be exact even if you’re checking in from somewhere
-          else.
-        </p>
       </section>
 
       <footer class="bottom-row">
@@ -376,7 +364,7 @@
         </p>
         <button class="primary-btn" type="button" onclick="copyLink()">
           <span>🔔</span>
-          <span>Share with Éilís</span>
+          <span>Share with your friends</span>
         </button>
       </footer>
     </section>
@@ -392,8 +380,31 @@
     const minutesEl = document.getElementById("minutes");
     const secondsEl = document.getElementById("seconds");
 
+    let countdownInterval = null;
+    let hasFinished = false;
+
     function pad(value) {
       return value.toString().padStart(2, "0");
+    }
+
+    function launchConfettiBurst() {
+      if (typeof confetti !== "function") return;
+
+      const duration = 1200;
+      const end = Date.now() + duration;
+
+      (function frame() {
+        confetti({
+          particleCount: 40,
+          spread: 60,
+          startVelocity: 40,
+          gravity: 0.8,
+          origin: { y: 0.3 }
+        });
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      })();
     }
 
     function updateCountdown() {
@@ -405,6 +416,14 @@
         hoursEl.textContent = "00";
         minutesEl.textContent = "00";
         secondsEl.textContent = "00";
+
+        if (!hasFinished) {
+          hasFinished = true;
+          launchConfettiBurst();
+          if (countdownInterval) {
+            clearInterval(countdownInterval);
+          }
+        }
         return;
       }
 
@@ -426,19 +445,21 @@
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).then(
           () => {
-            alert("Link copied! Send it to Éilís so she can watch the countdown too.");
+            alert("Link copied! Share it with your friends so they can count down with you.");
           },
           () => {
             alert("Couldn’t copy automatically, but you can copy the link from the address bar.");
           }
         );
       } else {
-        alert("You can copy the link from the address bar and send it to Éilís.");
+        alert("You can copy the link from the address bar and send it to your friends.");
       }
     }
 
+    // Initialise countdown and confetti on load
     updateCountdown();
-    setInterval(updateCountdown, 1000);
+    countdownInterval = setInterval(updateCountdown, 1000);
+    launchConfettiBurst();
   </script>
 </body>
 </html>
