@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Countdown to 20:33 – Éilís Timer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A very serious, definitely professional countdown to 20:33 UK time on 15 November 2025." />
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-alt: #080c24;
+      --accent: #ff4b81;
+      --accent-soft: rgba(255, 75, 129, 0.15);
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --border-subtle: rgba(148, 163, 184, 0.4);
+      --shadow-soft: 0 22px 45px rgba(15, 23, 42, 0.8);
+      --radius-xl: 1.75rem;
+      --radius-full: 999px;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      --glow: 0 0 20px rgba(255, 75, 129, 0.65);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      font-family: var(--font-main);
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at top left, #1d243a 0, transparent 55%),
+        radial-gradient(circle at bottom right, #111827 0, transparent 55%),
+        radial-gradient(circle at top right, #0b1120 0, transparent 55%),
+        #020617;
+      background-attachment: fixed;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.06;
+      mix-blend-mode: soft-light;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='noStitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+      z-index: 0;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #111827, #020617 70%);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border-subtle);
+      padding: 1.75rem 1.75rem 1.9rem;
+      backdrop-filter: blur(18px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(255, 75, 129, 0.16) 0, transparent 50%),
+        radial-gradient(circle at 90% 100%, rgba(59, 130, 246, 0.16) 0, transparent 55%);
+      opacity: 0.7;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.28rem 0.75rem;
+      border-radius: var(--radius-full);
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: var(--glow);
+    }
+
+    h1 {
+      font-size: clamp(1.85rem, 3vw, 2.35rem);
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.03em;
+    }
+
+    .highlight {
+      background: linear-gradient(120deg, #f97316, #fb7185, #e879f9);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 18px rgba(248, 113, 113, 0.2);
+    }
+
+    .subtitle {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      max-width: 32rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .subtitle strong {
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .timer-shell {
+      margin-top: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .timer-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+      margin-bottom: 0.55rem;
+    }
+
+    .timer {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .time-block {
+      flex: 1;
+      min-width: 70px;
+      padding: 0.7rem 0.55rem;
+      border-radius: 1rem;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.75), #020617);
+      box-shadow: 0 17px 30px rgba(15, 23, 42, 0.8);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .time-block::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.25s ease-out;
+      pointer-events: none;
+    }
+
+    .time-block strong {
+      display: block;
+      font-size: clamp(1.6rem, 2.4vw, 1.9rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time-block span {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .timer.running .time-block::before {
+      opacity: 1;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.75rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .footer-left {
+      max-width: 70%;
+    }
+
+    .footer-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.95rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.8);
+      text-decoration: none;
+      color: #e5e7eb;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .footer-cta span {
+      font-size: 0.9rem;
+    }
+
+    .footer-cta small {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .nsfw {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .time-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 1.4rem 1.25rem 1.5rem;
+        border-radius: 1.45rem;
+      }
+      .time-block {
+        padding: 0.6rem 0.4rem;
+      }
+      .footer-left {
+        max-width: 100%;
+      }
+      .footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .footer-cta {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+
+  <main class="shell" role="main">
+    <section class="card" aria-label="Countdown timer">
+      <div class="badge">
+        <span class="badge-dot" aria-hidden="true"></span>
+        <span>Live countdown · UK time</span>
+      </div>
+
+      <h1>
+        Countdown to
+        <span class="highlight">20:33</span>
+        for Éilís
+      </h1>
+      <p class="subtitle">
+        A completely respectable, definitely professional countdown until
+        <strong>Saturday 15&nbsp;November&nbsp;2025, 20:33 (UK time)</strong> –
+        also known as the exact moment Éilís gets fucked.
+      </p>
+
+      <div class="timer-shell">
+        <div class="timer-label">Time remaining (DD : HH : MM : SS)</div>
+        <div id="timer" class="timer running" aria-live="polite">
+          <div class="time-block">
+            <strong id="days">00</strong>
+            <span>Days</span>
+          </div>
+          <div class="time-block">
+            <strong id="hours">00</strong>
+            <span>Hours</span>
+          </div>
+          <div class="time-block">
+            <strong id="minutes">00</strong>
+            <span>Minutes</span>
+          </div>
+          <div class="time-block">
+            <strong id="seconds">00</strong>
+            <span>Seconds</span>
+          </div>
+        </div>
+        <p class="time-meta">
+          Target moment is locked to
+          <strong>UK time (Europe/London)</strong>. The countdown adjusts
+          automatically for whoever’s viewing it.
+        </p>
+      </div>
+
+      <div class="footer">
+        <div class="footer-left">
+          <p>
+            Share this page as
+            <span class="nsfw">eilis-gets-fucked.com</span>
+            or similar for maximum chaos. (Actual URL is up to you.)
+          </p>
+        </div>
+        <a class="footer-cta" href="#" onclick="navigator.clipboard?.writeText(window.location.href); return false;">
+          <span>🔗</span>
+          <div>
+            <small>Share</small><br />
+            Copy countdown link
+          </div>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // Target: 20:33 UK time, 15 November 2025
+    // In November, UK time = UTC, so we lock to that instant.
+    const targetDate = new Date("2025-11-15T20:33:00Z");
+
+    const daysEl = document.getElementById("days");
+    const hoursEl = document.getElementById("hours");
+    const minutesEl = document.getElementById("minutes");
+    const secondsEl = document.getElementById("seconds");
+    const timerContainer = document.getElementById("timer");
+
+    function pad(value) {
+      return value.toString().padStart(2, "0");
+    }
+
+    function updateCountdown() {
+      const now = new Date();
+      const diff = targetDate.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        daysEl.textContent = "00";
+        hoursEl.textContent = "00";
+        minutesEl.textContent = "00";
+        secondsEl.textContent = "00";
+        timerContainer.classList.remove("running");
+        timerContainer.setAttribute("aria-label", "Countdown finished");
+        return;
+      }
+
+      const totalSeconds = Math.floor(diff / 1000);
+
+      const days = Math.floor(totalSeconds / (60 * 60 * 24));
+      const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
+      const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+      const seconds = totalSeconds % 60;
+
+      daysEl.textContent = pad(days);
+      hoursEl.textContent = pad(hours);
+      minutesEl.textContent = pad(minutes);
+      secondsEl.textContent = pad(seconds);
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
+</body>
+</html>
